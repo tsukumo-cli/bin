@@ -1,0 +1,46 @@
+#!/bin/sh
+
+# author:  Christopher Kelley
+# version: 1
+# date:    2014.05.29
+# brief:   Used to kill a rogue pts
+# why:     Two reasons for wanting this functionality:
+#           common:   pts session ended with running process and remains on
+#                     successive login
+#           uncommon: pts session is being run by an unknown user
+#                     (sudo required to run this for any other user)
+#
+# This program
+#  will: kill a running pts
+#  will not: kill the pts representing the current tty
+#  expects:
+#   1: {integer} - pts number to kill
+#   2+: {any} - will be ignored
+
+
+# Find pts number and associated user by issuing the `who` command.
+
+# Verify a pts number was specified
+if [ $# -lt 1 ]; then
+    echo 'specify a pts'
+    exit 1
+fi
+
+# Verify that number does not match the current tty
+if [ $1 -eq $(tty | cut -d'/' -f4) ]; then
+    echo 'pts represents current tty'
+    exit 2
+fi
+
+# Obtain the pid of the specified pts
+pid=$( echo $(ps -ef | grep "pts/$1.*[0-9] \-[a-z]*") | cut -d' ' -f2 )
+
+# Verify a pid was returned, otherwise the pts must not exist
+if [ "x$pid" = "x" ]; then
+    echo 'pts does not exist'
+    exit 3
+fi
+
+# Send the kill signal
+kill -HUP $pid
+
