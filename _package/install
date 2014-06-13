@@ -1,0 +1,20 @@
+#!/bin/bash
+
+declare -A osInfo;
+osInfo[/etc/redhat-release]="yum install "
+osInfo[/etc/arch-release]="pacman -S "
+osInfo[/etc/gentoo-release]="emerge "
+osInfo[/etc/SuSE-release]="zypp install "
+osInfo[/etc/debian_version]="apt-get install "
+
+for f in ${!osInfo[@]}
+do
+    if [[ -f $f ]]
+    then
+        sudo ${osInfo[$f]} $@
+    fi
+done
+
+
+# vim: set syntax=sh
+
