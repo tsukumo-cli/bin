@@ -1,0 +1,6 @@
+#!/bin/sh
+
+g=$(cat $(git ls-files) | wc -l);o=0;f='';for i in $(git ls-files);do echo "Reading: $i";b=$(echo "$(git blame -w $i)");if [ $(echo "$b" | wc -l) != 1 ];then o=$(($o+1));f="$f\n$b";fi;done;IFS='
+';c='';n=0;for l in $f;do echo -n "\rProcessing: $n of about $g";n=$(($n+1));c="${c}\n$(echo $l|grep -oP '(?<= \().*? (?=[0-9]{4}(?:-[0-9]{2}){2} (?:[0-9]{2}:){2}[0-9]{2} -)')";done;n=$(($n+$o));echo "\rProcessed: $n lines of code.";echo ' ';IFS=' ';t=$(echo $(echo $c|tr '\n' ' ')|tr ' ' '\n'|sort|uniq -c);IFS='
+';for i in $t;do echo $(($(echo $i | grep -oP '[0-9]*')*100/$n))%$i;done;
+
